@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Один важный вопрос…</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --rose:#ff7a9a;
+    --rose-deep:#e85a7d;
+    --plum:#3d2435;
+    --blush:#fff1f3;
+    --cream:#fff8f4;
+    --gold:#f4b860;
+    --ink:#46303b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Manrope',system-ui,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 600px at 80% -10%, #ffd9e2 0%, transparent 55%),
+      radial-gradient(900px 500px at 0% 110%, #ffe3cf 0%, transparent 55%),
+      linear-gradient(160deg,#fff1f3 0%, #fff8f4 100%);
+    min-height:100dvh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    position:relative;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  /* floating hearts background */
+  .hearts{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+  .heart{
+    position:absolute;bottom:-40px;font-size:22px;opacity:0;
+    animation:rise linear infinite;
+    will-change:transform,opacity;
+  }
+  @keyframes rise{
+    0%{transform:translateY(0) rotate(0);opacity:0}
+    10%{opacity:.85}
+    90%{opacity:.85}
+    100%{transform:translateY(-115dvh) rotate(40deg);opacity:0}
+  }
+
+  .stage{position:relative;z-index:2;width:100%;max-width:560px;padding:24px}
+
+  .card{
+    background:rgba(255,255,255,.72);
+    backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,.9);
+    border-radius:28px;
+    padding:44px 34px 40px;
+    box-shadow:0 30px 70px -25px rgba(232,90,125,.45);
+    text-align:center;
+    animation:pop .6s cubic-bezier(.2,.9,.3,1.2) both;
+  }
+  @keyframes pop{from{opacity:0;transform:translateY(18px) scale(.96)}to{opacity:1;transform:none}}
+
+  .eyebrow{
+    font-size:14px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--rose-deep);font-weight:700;margin-bottom:14px;opacity:.85;
+  }
+  .question{
+    font-family:'Caveat',cursive;
+    font-weight:700;
+    font-size:clamp(38px,9vw,58px);
+    line-height:1.05;
+    color:var(--plum);
+    margin-bottom:6px;
+  }
+  .sub{font-size:15px;color:#8a6b76;margin-bottom:30px}
+
+  .buttons{display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap;min-height:64px}
+
+  .btn{
+    font-family:'Manrope',sans-serif;font-weight:700;font-size:18px;
+    border:none;border-radius:999px;padding:16px 34px;cursor:pointer;
+    transition:transform .15s ease, box-shadow .2s ease, background .2s ease;
+  }
+  .btn-yes{
+    background:linear-gradient(135deg,var(--rose) 0%, var(--rose-deep) 100%);
+    color:#fff;box-shadow:0 14px 30px -10px rgba(232,90,125,.7);
+  }
+  .btn-yes:hover{transform:translateY(-2px) scale(1.04)}
+  .btn-yes:active{transform:translateY(0) scale(.98)}
+
+  .btn-no{
+    background:#fff;color:#9c7d88;border:1.5px solid #f0d3da;
+    position:relative;z-index:5;
+  }
+
+  /* runaway state -> fixed positioning */
+  .btn-no.runaway{position:fixed;margin:0;transition:left .45s cubic-bezier(.22,.61,.36,1), top .45s cubic-bezier(.22,.61,.36,1)}
+
+  /* SCREEN 2 — planning */
+  .screen{display:none}
+  .screen.active{display:block}
+
+  .group{margin:0 auto 22px;max-width:420px;text-align:left}
+  .group h3{
+    font-family:'Caveat',cursive;font-size:28px;color:var(--plum);
+    margin-bottom:12px;display:flex;align-items:center;gap:8px;
+  }
+  .chips{display:flex;flex-wrap:wrap;gap:10px}
+  .chip{
+    font-family:'Manrope',sans-serif;font-weight:600;font-size:15px;
+    padding:11px 18px;border-radius:999px;cursor:pointer;
+    background:#fff;border:1.5px solid #f1d6dc;color:#7a5d68;
+    transition:all .15s ease;
+  }
+  .chip:hover{border-color:var(--rose);transform:translateY(-1px)}
+  .chip.selected{
+    background:linear-gradient(135deg,var(--rose) 0%, var(--rose-deep) 100%);
+    color:#fff;border-color:transparent;box-shadow:0 10px 22px -10px rgba(232,90,125,.7);
+  }
+
+  .done-btn{margin-top:10px}
+
+  /* SCREEN 3 — summary */
+  .summary{text-align:left;max-width:420px;margin:18px auto 0}
+  .summary .row{
+    display:flex;align-items:center;gap:14px;padding:14px 16px;
+    background:#fff;border:1px solid #f3d9df;border-radius:16px;margin-bottom:10px;
+  }
+  .summary .row .ic{font-size:24px}
+  .summary .row .lbl{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#b08c97;font-weight:700}
+  .summary .row .val{font-size:17px;font-weight:600;color:var(--plum)}
+  .toast{margin-top:14px;font-size:14px;color:var(--rose-deep);font-weight:600;min-height:20px}
+
+  .footnote{margin-top:22px;font-size:13px;color:#b79aa3}
+</style>
+</head>
+<body>
+<div class="hearts" id="hearts"></div>
+
+<div class="stage">
+  <!-- SCREEN 1 -->
+  <div class="card screen active" id="screen1">
+    <div class="eyebrow">У меня есть один вопрос</div>
+    <h1 class="question">Пойдёшь со мной<br>на свидание?</h1>
+    <p class="sub">Только честно 🙈</p>
+    <div class="buttons" id="btnRow">
+      <button class="btn btn-yes" id="yesBtn">Да 💖</button>
+      <button class="btn btn-no" id="noBtn">Нет</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 2 -->
+  <div class="card screen" id="screen2">
+    <div class="eyebrow">Я так и знал 🎉</div>
+    <h1 class="question" style="margin-bottom:24px">Давай всё спланируем</h1>
+
+    <div class="group">
+      <h3>🗓️ Когда тебе удобно?</h3>
+      <div class="chips" data-group="when">
+        <span class="chip">Сегодня вечером</span>
+        <span class="chip">Завтра</span>
+        <span class="chip">В выходные</span>
+        <span class="chip">Напишу сама ✍️</span>
+      </div>
+    </div>
+
+    <div class="group">
+      <h3>📍 Где встретимся?</h3>
+      <div class="chips" data-group="where">
+        <span class="chip">Уютное кафе</span>
+        <span class="chip">Прогулка в парке</span>
+        <span class="chip">Кино</span>
+        <span class="chip">Набережная</span>
+        <span class="chip">Сюрприз 🎁</span>
+      </div>
+    </div>
+
+    <div class="group">
+      <h3>🍽️ Что будем кушать?</h3>
+      <div class="chips" data-group="food">
+        <span class="chip">Пицца</span>
+        <span class="chip">Суши</span>
+        <span class="chip">Бургеры</span>
+        <span class="chip">Десерты</span>
+        <span class="chip">Что-нибудь вкусное</span>
+      </div>
+    </div>
+
+    <button class="btn btn-yes done-btn" id="doneBtn">Готово 💌</button>
+  </div>
+
+  <!-- SCREEN 3 -->
+  <div class="card screen" id="screen3">
+    <div class="eyebrow">Свидание назначено</div>
+    <h1 class="question" style="margin-bottom:18px">Не могу дождаться 💞</h1>
+    <div class="summary" id="summary"></div>
+    <button class="btn btn-yes" id="copyBtn" style="margin-top:8px">Скопировать план 📋</button>
+    <div class="toast" id="toast"></div>
+    <p class="footnote">Сделано с любовью</p>
+  </div>
+</div>
+
+<script>
+/* ---------- floating hearts ---------- */
+(function(){
+  const layer=document.getElementById('hearts');
+  const glyphs=['💖','💕','💗','🩷','💘','❤️'];
+  for(let i=0;i<22;i++){
+    const h=document.createElement('div');
+    h.className='heart';
+    h.textContent=glyphs[Math.floor(Math.random()*glyphs.length)];
+    h.style.left=Math.random()*100+'vw';
+    h.style.fontSize=(14+Math.random()*22)+'px';
+    h.style.animationDuration=(7+Math.random()*9)+'s';
+    h.style.animationDelay=(Math.random()*9)+'s';
+    layer.appendChild(h);
+  }
+})();
+
+/* ---------- runaway "No" button ---------- */
+const noBtn=document.getElementById('noBtn');
+const yesBtn=document.getElementById('yesBtn');
+const noLabels=['Нет','А точно нет?','Уверена?','Подумай ещё 🥺','Ну пожалуйста','Последний шанс…','😭'];
+let dodges=0;
+
+function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
+
+// place the button at the position it currently occupies, then switch to fixed
+function arm(){
+  if(noBtn.classList.contains('runaway'))return;
+  const r=noBtn.getBoundingClientRect();
+  noBtn.classList.add('runaway');
+  noBtn.style.left=r.left+'px';
+  noBtn.style.top=r.top+'px';
+}
+
+// glide away from a given point (cursor / finger)
+function flee(px,py){
+  arm();
+  const w=noBtn.offsetWidth, h=noBtn.offsetHeight;
+  const cx=noBtn.offsetLeft+w/2, cy=noBtn.offsetTop+h/2;
+  let dx=cx-px, dy=cy-py;
+  let dist=Math.hypot(dx,dy)||1;
+  // push roughly the button's own size away, in the direction opposite the cursor
+  const push=Math.max(w,h)*1.6;
+  let nx=cx + (dx/dist)*push - w/2;
+  let ny=cy + (dy/dist)*push - h/2;
+  // if it would leave the screen, bounce it the other way
+  const maxX=window.innerWidth-w-12, maxY=window.innerHeight-h-12;
+  if(nx<12||nx>maxX) nx=cx - (dx/dist)*push - w/2;
+  if(ny<12||ny>maxY) ny=cy - (dy/dist)*push - h/2;
+  noBtn.style.left=clamp(nx,12,maxX)+'px';
+  noBtn.style.top=clamp(ny,12,maxY)+'px';
+
+  dodges++;
+  if(dodges<noLabels.length) noBtn.textContent=noLabels[dodges];
+  yesBtn.style.transform='scale('+Math.min(1.6,1+dodges*0.1)+')';
+}
+
+// desktop: react when the cursor gets near the button (proximity field)
+document.addEventListener('mousemove',e=>{
+  if(!noBtn.isConnected)return;
+  const r=noBtn.getBoundingClientRect();
+  const cx=r.left+r.width/2, cy=r.top+r.height/2;
+  const near=Math.hypot(e.clientX-cx,e.clientY-cy) < Math.max(r.width,r.height)*1.4;
+  if(near) flee(e.clientX,e.clientY);
+});
+
+// in case it's still hovered/clicked directly
+noBtn.addEventListener('mousedown',e=>{e.preventDefault();flee(e.clientX,e.clientY);});
+// mobile: dodge the finger before the tap lands
+noBtn.addEventListener('touchstart',e=>{e.preventDefault();const t=e.touches[0];flee(t.clientX,t.clientY);},{passive:false});
+noBtn.addEventListener('click',e=>{e.preventDefault();const r=noBtn.getBoundingClientRect();flee(r.left+r.width/2,r.top);});
+
+/* ---------- screen switching ---------- */
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+yesBtn.addEventListener('click',()=>{ burst(); setTimeout(()=>show('screen2'),250); });
+
+/* little heart burst on YES */
+function burst(){
+  for(let i=0;i<18;i++){
+    const h=document.createElement('div');
+    h.className='heart';
+    h.textContent='💖';
+    h.style.left=(45+Math.random()*10)+'vw';
+    h.style.bottom='30vh';
+    h.style.fontSize=(18+Math.random()*20)+'px';
+    h.style.animationDuration=(2.5+Math.random()*2)+'s';
+    h.style.animationDelay='0s';
+    document.getElementById('hearts').appendChild(h);
+    setTimeout(()=>h.remove(),4500);
+  }
+}
+
+/* ---------- chip selection ---------- */
+const picks={when:null,where:null,food:null};
+document.querySelectorAll('.chips').forEach(group=>{
+  group.addEventListener('click',e=>{
+    if(!e.target.classList.contains('chip'))return;
+    group.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected'));
+    e.target.classList.add('selected');
+    picks[group.dataset.group]=e.target.textContent;
+  });
+});
+
+/* ---------- done -> summary ---------- */
+document.getElementById('doneBtn').addEventListener('click',()=>{
+  const when=picks.when||'выберешь сама 😉';
+  const where=picks.where||'на твой вкус';
+  const food=picks.food||'что захочешь';
+  document.getElementById('summary').innerHTML=`
+    <div class="row"><span class="ic">🗓️</span><div><div class="lbl">Когда</div><div class="val">${when}</div></div></div>
+    <div class="row"><span class="ic">📍</span><div><div class="lbl">Где</div><div class="val">${where}</div></div></div>
+    <div class="row"><span class="ic">🍽️</span><div><div class="lbl">Едим</div><div class="val">${food}</div></div></div>
+  `;
+  burst();
+  show('screen3');
+});
+
+/* ---------- copy plan ---------- */
+document.getElementById('copyBtn').addEventListener('click',()=>{
+  const when=picks.when||'—', where=picks.where||'—', food=picks.food||'—';
+  const text=`Наше свидание 💖\nКогда: ${when}\nГде: ${where}\nЕдим: ${food}`;
+  const toast=document.getElementById('toast');
+  navigator.clipboard?.writeText(text).then(
+    ()=>toast.textContent='Скопировано! Можешь отправить 💌',
+    ()=>toast.textContent=text
+  );
+});
+</script>
+</body>
+</html>
